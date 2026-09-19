@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "236706773512",
+    "firebase_url": "https://exam-permit-default-rtdb.firebaseio.com",
+    "project_id": "exam-permit",
+    "storage_bucket": "exam-permit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:236706773512:android:806a52a53418cc76982fbd",
+        "android_client_info": {
+          "package_name": "com.example.special_exam_permit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiNQs0bFYSV-SaONACdJ1Yb9rPl7y2JUs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
