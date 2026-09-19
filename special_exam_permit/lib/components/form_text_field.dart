@@ -7,10 +7,12 @@ class FormTextField extends StatelessWidget {
   final int maxLines;
   final ValueChanged<String>? onChanged;
   final String? errorText;
+  final TextEditingController? controller;
 
   const FormTextField({
     super.key,
     required this.hint,
+    this.controller,
     this.maxLines = 1,
     this.onChanged,
     this.errorText,
@@ -19,11 +21,13 @@ class FormTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: controller,
       maxLines: maxLines,
       onChanged: onChanged,
       style: const TextStyle(color: Colors.black87),
       decoration: InputDecoration(
         hintText: hint,
+
         errorText: errorText,
         hintStyle: const TextStyle(color: Color(0xFF8A7A7D)),
         filled: true,

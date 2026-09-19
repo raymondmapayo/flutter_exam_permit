@@ -1,12 +1,10 @@
 class ExamReasonModel {
+  final String id;
   final String name;
 
-  const ExamReasonModel({required this.name});
-}
+  const ExamReasonModel({required this.id, required this.name});
 
-const List<ExamReasonModel> examReasonList = [
-  ExamReasonModel(name: 'Medical reasons'),
-  ExamReasonModel(name: 'Schedule conflict'),
-  ExamReasonModel(name: 'Official school activity'),
-  ExamReasonModel(name: 'Family emergency'),
-];
+  factory ExamReasonModel.fromFirestore(String id, Map<String, dynamic> data) {
+    return ExamReasonModel(id: id, name: data['name'] ?? '');
+  }
+}

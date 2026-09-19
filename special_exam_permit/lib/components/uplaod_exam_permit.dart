@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import '../screens/special_exam_landing/um_theme.dart';
 
 class UploadDocumentCard extends StatelessWidget {
-  const UploadDocumentCard({super.key});
+  final VoidCallback onChooseFile;
+  final String? fileName;
+
+  const UploadDocumentCard({
+    super.key,
+    required this.onChooseFile,
+    this.fileName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +25,9 @@ class UploadDocumentCard extends StatelessWidget {
       child: Column(
         children: [
           const Icon(Icons.upload_file, color: UMTheme.maroon, size: 45),
+
           const SizedBox(height: 10),
+
           const Text(
             'Upload your exam permit',
             style: TextStyle(
@@ -27,15 +36,19 @@ class UploadDocumentCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+
           const SizedBox(height: 6),
+
           const Text(
             'Upload a certificate or supporting document.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Color(0xFF7A6A6D), fontSize: 12),
           ),
+
           const SizedBox(height: 12),
+
           OutlinedButton(
-            onPressed: () {},
+            onPressed: onChooseFile,
             style: OutlinedButton.styleFrom(
               foregroundColor: UMTheme.maroon,
               side: const BorderSide(color: UMTheme.maroon),
@@ -43,8 +56,17 @@ class UploadDocumentCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Choose File'),
+            child: Text(fileName ?? 'Choose File'),
           ),
+
+          if (fileName != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              fileName!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.black87, fontSize: 12),
+            ),
+          ],
         ],
       ),
     );

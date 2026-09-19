@@ -1,14 +1,17 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:special_exam_permit/admin/admin_dashboard_page.dart';
 import 'package:special_exam_permit/login.dart';
+import 'package:special_exam_permit/splash/splash_screen.dart';
 
 import 'firebase_options.dart';
 
-import 'package:special_exam_permit/splash/splash_screen.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: '.env');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -30,7 +33,6 @@ class MyApp extends StatelessWidget {
 
       routes: {
         '/': (context) => const SplashScreen(),
-
         '/login-page': (context) => const LoginPage(),
         '/admin-dashboard': (context) => const AdminDashboardPage(),
       },

@@ -1,36 +1,76 @@
 import 'package:flutter/material.dart';
+
 import 'package:special_exam_permit/model/exam_reason_model.dart';
 import 'package:special_exam_permit/model/exam_subject_model.dart';
 import 'package:special_exam_permit/model/exam_time_model.dart';
+
 import 'package:special_exam_permit/screens/special_exam_landing/um_theme.dart';
 
 import 'components/custom_dropdown.dart';
 import 'components/form_label.dart';
 import 'components/form_text_field.dart';
-import 'components/upload_document_card.dart';
+import 'components/uplaod_exam_permit.dart';
 
 class MainRequestForm extends StatelessWidget {
-  // DROPDOWN VALUES
+  // ============================================================
+  // FIREBASE DROPDOWN DATA
+  // ============================================================
+
+  final List<ExamSubjectModel> subjects;
+  final List<ExamReasonModel> reasons;
+  final List<ExamTimeModel> examTimes;
+
+  final TextEditingController studentIdController;
+  final TextEditingController studentNameController;
+  final TextEditingController courseYearController;
+  final TextEditingController emailController;
+  final TextEditingController additionalDetailsController;
+
+  // ============================================================
+  // SELECTED DROPDOWN VALUES
+  // ============================================================
+
   final String? selectedSubject;
   final String? selectedReason;
   final String? selectedExamTime;
 
+  // ============================================================
   // DROPDOWN CALLBACKS
+  // ============================================================
+
   final ValueChanged<String?> onSubjectChanged;
   final ValueChanged<String?> onReasonChanged;
   final ValueChanged<String?> onExamTimeChanged;
 
+  // ============================================================
   // TEXTFIELD CALLBACKS
+  // ============================================================
+
   final ValueChanged<String> onStudentIdChanged;
   final ValueChanged<String> onStudentNameChanged;
   final ValueChanged<String> onCourseYearChanged;
   final ValueChanged<String> onEmailChanged;
   final ValueChanged<String> onAdditionalDetailsChanged;
 
-  // SUBMIT
-  final VoidCallback onSubmit;
+  // ============================================================
+  // DOCUMENT UPLOAD
+  // ============================================================
 
+  final String? selectedFileName;
+  final VoidCallback onChooseFile;
+  final bool isUploading;
+
+  // ============================================================
+  // SUBMIT
+  // ============================================================
+
+  final VoidCallback onSubmit;
+  final bool isSubmitting;
+
+  // ============================================================
   // ERROR MESSAGES
+  // ============================================================
+
   final String? studentIdError;
   final String? studentNameError;
   final String? courseYearError;
@@ -43,7 +83,12 @@ class MainRequestForm extends StatelessWidget {
   const MainRequestForm({
     super.key,
 
-    // DROPDOWN VALUES
+    // FIREBASE DROPDOWN DATA
+    required this.subjects,
+    required this.reasons,
+    required this.examTimes,
+
+    // SELECTED DROPDOWN VALUES
     required this.selectedSubject,
     required this.selectedReason,
     required this.selectedExamTime,
@@ -60,8 +105,14 @@ class MainRequestForm extends StatelessWidget {
     required this.onEmailChanged,
     required this.onAdditionalDetailsChanged,
 
+    // DOCUMENT UPLOAD
+    required this.onChooseFile,
+    this.selectedFileName,
+    this.isUploading = false,
+
     // SUBMIT
     required this.onSubmit,
+    this.isSubmitting = false,
 
     // ERROR MESSAGES
     this.studentIdError,
@@ -72,6 +123,12 @@ class MainRequestForm extends StatelessWidget {
     this.reasonError,
     this.additionalDetailsError,
     this.examTimeError,
+
+    required this.studentIdController,
+    required this.studentNameController,
+    required this.courseYearController,
+    required this.emailController,
+    required this.additionalDetailsController,
   });
 
   @override
@@ -79,25 +136,18 @@ class MainRequestForm extends StatelessWidget {
     return Scaffold(
       backgroundColor: UMTheme.background,
 
-      // APP BAR
-      appBar: AppBar(
-        backgroundColor: UMTheme.maroon,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'ExamFlow',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+
             children: [
+              // ============================================================
               // PAGE TITLE
+              // ============================================================
+
               const Text(
                 'Special Examination Request',
                 style: TextStyle(
@@ -116,7 +166,9 @@ class MainRequestForm extends StatelessWidget {
 
               const SizedBox(height: 25),
 
+              // ============================================================
               // STUDENT INFORMATION
+              // ============================================================
               const Text(
                 'Student Information',
                 style: TextStyle(
@@ -130,9 +182,11 @@ class MainRequestForm extends StatelessWidget {
 
               // STUDENT ID
               TextField(
+                controller: studentIdController,
+                onChanged: onStudentIdChanged,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  label: Text('Student ID'),
+                  border: const OutlineInputBorder(),
+                  label: const Text('Student ID'),
                   errorText: studentIdError,
                 ),
               ),
@@ -141,20 +195,24 @@ class MainRequestForm extends StatelessWidget {
 
               // STUDENT NAME
               TextField(
+                controller: studentNameController,
+                onChanged: onStudentNameChanged,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  label: Text('Student Name'),
-
+                  border: const OutlineInputBorder(),
+                  label: const Text('Student Name'),
                   errorText: studentNameError,
                 ),
               ),
+
               const SizedBox(height: 18),
 
               // COURSE & YEAR
               TextField(
+                controller: courseYearController,
+                onChanged: onCourseYearChanged,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  label: Text('COURSE & YEAR'),
+                  border: const OutlineInputBorder(),
+                  label: const Text('Course & Year'),
                   errorText: courseYearError,
                 ),
               ),
@@ -163,16 +221,21 @@ class MainRequestForm extends StatelessWidget {
 
               // EMAIL
               TextField(
+                controller: emailController,
+                onChanged: onEmailChanged,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  label: Text('Email'),
+                  border: const OutlineInputBorder(),
+                  label: const Text('Email'),
                   errorText: emailError,
                 ),
               ),
 
               const SizedBox(height: 28),
 
+              // ============================================================
               // EXAM INFORMATION
+              // ============================================================
               const Text(
                 'Exam Information',
                 style: TextStyle(
@@ -184,14 +247,14 @@ class MainRequestForm extends StatelessWidget {
 
               const SizedBox(height: 18),
 
+              // ============================================================
               // SUBJECT
+              // ============================================================
               const FormLabel(text: 'Subject'),
 
               CustomDropdown(
                 hint: 'Select Subject',
-                options: examSubjectList
-                    .map((subject) => subject.name)
-                    .toList(),
+                options: subjects.map((subject) => subject.name).toList(),
                 value: selectedSubject,
                 onChanged: onSubjectChanged,
                 errorText: subjectError,
@@ -199,12 +262,14 @@ class MainRequestForm extends StatelessWidget {
 
               const SizedBox(height: 18),
 
+              // ============================================================
               // REASON
+              // ============================================================
               const FormLabel(text: 'Reason for Special Exam'),
 
               CustomDropdown(
                 hint: 'Select Reason',
-                options: examReasonList.map((reason) => reason.name).toList(),
+                options: reasons.map((reason) => reason.name).toList(),
                 value: selectedReason,
                 onChanged: onReasonChanged,
                 errorText: reasonError,
@@ -212,10 +277,13 @@ class MainRequestForm extends StatelessWidget {
 
               const SizedBox(height: 18),
 
+              // ============================================================
               // ADDITIONAL DETAILS
+              // ============================================================
               const FormLabel(text: 'Additional Details'),
 
               FormTextField(
+                controller: additionalDetailsController,
                 hint: 'Explain your reason or provide additional details',
                 maxLines: 4,
                 onChanged: onAdditionalDetailsChanged,
@@ -224,19 +292,60 @@ class MainRequestForm extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              // ============================================================
               // DOCUMENT UPLOAD
+              // ============================================================
               const FormLabel(text: 'Supporting Document'),
 
-              const UploadDocumentCard(),
+              UploadDocumentCard(
+                fileName: selectedFileName,
+                onChooseFile: onChooseFile,
+              ),
+
+              if (isUploading) ...[
+                const SizedBox(height: 10),
+
+                const Row(
+                  children: [
+                    SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+
+                    SizedBox(width: 10),
+
+                    Text(
+                      'Uploading document...',
+                      style: TextStyle(color: Color(0xFF7A6A6D), fontSize: 13),
+                    ),
+                  ],
+                ),
+              ],
 
               const SizedBox(height: 20),
 
+              // ============================================================
               // EXAM TIME
+              // ============================================================
               const FormLabel(text: 'Preferred Exam Time'),
 
               CustomDropdown(
                 hint: 'Select Exam Time',
-                options: examTimeList.map((time) => time.time).toList(),
+
+                options: examTimes.map((time) {
+                  if (time.examDate != null) {
+                    final date = time.examDate!;
+
+                    final formattedDate =
+                        '${date.month}/${date.day}/${date.year}';
+
+                    return '$formattedDate - ${time.displayTime}';
+                  }
+
+                  return time.displayTime;
+                }).toList(),
+
                 value: selectedExamTime,
                 onChanged: onExamTimeChanged,
                 errorText: examTimeError,
@@ -244,24 +353,42 @@ class MainRequestForm extends StatelessWidget {
 
               const SizedBox(height: 30),
 
+              // ============================================================
               // SUBMIT BUTTON
+              // ============================================================
               SizedBox(
                 width: double.infinity,
                 height: 52,
+
                 child: ElevatedButton(
-                  onPressed: onSubmit,
+                  onPressed: isSubmitting ? null : onSubmit,
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: UMTheme.maroon,
                     foregroundColor: Colors.white,
                     elevation: 0,
+
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text(
-                    'SUBMIT REQUEST',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
+
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'SUBMIT REQUEST',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
 

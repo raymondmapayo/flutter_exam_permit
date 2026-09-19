@@ -1,12 +1,26 @@
 class ExamTimeModel {
-  final String time;
+  final String id;
+  final DateTime? examDate;
+  final String startTime;
+  final String endTime;
 
-  const ExamTimeModel({required this.time});
+  const ExamTimeModel({
+    required this.id,
+    required this.examDate,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  String get displayTime {
+    return '$startTime - $endTime';
+  }
+
+  factory ExamTimeModel.fromFirestore(String id, Map<String, dynamic> data) {
+    return ExamTimeModel(
+      id: id,
+      examDate: data['examDate'] != null ? data['examDate'].toDate() : null,
+      startTime: data['startTime'] ?? '',
+      endTime: data['endTime'] ?? '',
+    );
+  }
 }
-
-const List<ExamTimeModel> examTimeList = [
-  ExamTimeModel(time: '8:00 AM - 10:00 AM'),
-  ExamTimeModel(time: '10:00 AM - 12:00 PM'),
-  ExamTimeModel(time: '1:00 PM - 3:00 PM'),
-  ExamTimeModel(time: '3:00 PM - 5:00 PM'),
-];
