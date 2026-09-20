@@ -40,12 +40,7 @@ class ContactSection extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ExamRequestPage(),
-                  ),
-                );
+                Navigator.pushNamed(context, '/login-page');
               },
               child: const Text(
                 'Request a special exam',

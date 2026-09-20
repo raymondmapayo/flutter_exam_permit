@@ -5,12 +5,15 @@ import 'package:special_exam_permit/main_request_form.dart';
 import 'package:special_exam_permit/model/exam_reason_model.dart';
 import 'package:special_exam_permit/model/exam_subject_model.dart';
 import 'package:special_exam_permit/model/exam_time_model.dart';
+import 'package:special_exam_permit/model/user_model.dart';
 import 'package:special_exam_permit/service/crud_exam_info_service.dart';
 
 import 'package:special_exam_permit/service/uplaod_service.dart';
 
 class ExamRequestPage extends StatefulWidget {
-  const ExamRequestPage({super.key});
+  final UserModel user;
+
+  const ExamRequestPage({super.key, required this.user});
 
   @override
   State<ExamRequestPage> createState() => _ExamRequestPageState();
@@ -89,6 +92,9 @@ class _ExamRequestPageState extends State<ExamRequestPage> {
   @override
   void initState() {
     super.initState();
+    _studentIdController.text = widget.user.studentId;
+    _studentNameController.text = widget.user.studentName;
+    _courseYearController.text = widget.user.courseYear;
 
     _loadSubjects();
     _loadReasons();
@@ -261,9 +267,15 @@ class _ExamRequestPageState extends State<ExamRequestPage> {
           : null;
 
       // EMAIL
-      emailError = _emailController.text.trim().isEmpty
-          ? 'Email is required'
-          : null;
+      final email = _emailController.text.trim().toLowerCase();
+
+      if (email.isEmpty) {
+        emailError = 'Email is required';
+      } else if (!email.endsWith('@umindanao.edu.ph')) {
+        emailError = 'Please use your UM email address';
+      } else {
+        emailError = null;
+      }
 
       // SUBJECT
       subjectError = selectedSubject == null ? 'Please select a subject' : null;
@@ -356,10 +368,10 @@ class _ExamRequestPageState extends State<ExamRequestPage> {
       });
 
       await _examInfoService.addExamRequest(
-        studentId: _studentIdController.text.trim(),
-        studentName: _studentNameController.text.trim(),
-        courseYear: _courseYearController.text.trim(),
-        email: _emailController.text.trim(),
+        studentId: widget.user.studentId,
+        studentName: widget.user.studentName,
+        courseYear: widget.user.courseYear,
+        email: _emailController.text.trim().toLowerCase(),
         subject: selectedSubject!,
         reason: selectedReason!,
         examTime: selectedExamTime!,

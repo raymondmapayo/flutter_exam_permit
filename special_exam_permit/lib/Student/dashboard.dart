@@ -33,11 +33,11 @@ class _DashboardState extends State<Dashboard> {
       },
     ),
 
-    const ExamRequestPage(),
+    ExamRequestPage(user: widget.user),
 
-    const StudentRequestsPage(),
+    StudentRequestsPage(user: widget.user),
 
-    const StudentProfilePage(),
+    StudentProfilePage(user: widget.user),
   ];
 
   @override
