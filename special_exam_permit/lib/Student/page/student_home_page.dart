@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:special_exam_permit/screens/special_exam_landing/um_theme.dart';
+import 'package:special_exam_permit/model/user_model.dart';
 
 class StudentHomePage extends StatelessWidget {
   final VoidCallback onRequestTap;
-  const StudentHomePage({super.key, required this.onRequestTap});
+  final UserModel user;
+  const StudentHomePage({
+    super.key,
+    required this.onRequestTap,
+    required this.user,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,9 +20,9 @@ class StudentHomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Welcome, Student! 👋',
-              style: TextStyle(
+            Text(
+              'Welcome, ${user.studentName}! 👋',
+              style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: UMTheme.maroon,

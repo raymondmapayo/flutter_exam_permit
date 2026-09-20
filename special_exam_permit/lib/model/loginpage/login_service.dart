@@ -1,9 +1,10 @@
+import 'package:special_exam_permit/model/user_model.dart';
 import 'package:special_exam_permit/service/auth_service.dart';
 
 class LoginService {
   final AuthService _authService = AuthService();
 
-  Future<String?> login({
+  Future<UserModel?> login({
     required String email,
     required String password,
   }) async {
@@ -28,14 +29,8 @@ class LoginService {
       );
     }
 
-    // ADMIN
-    if (userModel.role == 'admin') {
-      return 'admin';
-    }
-
-    // STUDENT
-    if (userModel.role == 'student') {
-      return 'student';
+    if (userModel.role == 'admin' || userModel.role == 'student') {
+      return userModel;
     }
 
     // INVALID ROLE

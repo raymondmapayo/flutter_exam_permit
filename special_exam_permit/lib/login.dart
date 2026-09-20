@@ -44,21 +44,21 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final role = await _loginService.login(
+      final user = await _loginService.login(
         email: emailController.text,
         password: passwordController.text,
       );
 
-      if (!mounted || role == null) {
+      if (!mounted || user == null) {
         return;
       }
 
-      if (role == 'admin') {
+      if (user.role == 'admin') {
         Navigator.pushReplacementNamed(context, '/admin-dashboard');
-      } else if (role == 'student') {
+      } else if (user.role == 'student') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
+          MaterialPageRoute(builder: (context) => Dashboard(user: user)),
         );
       }
     } on FirebaseAuthException catch (e) {

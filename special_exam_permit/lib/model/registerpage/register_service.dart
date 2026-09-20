@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:special_exam_permit/model/registerpage/register_model.dart';
-
 import 'package:special_exam_permit/service/auth_service.dart';
 
 class RegisterService {
@@ -28,6 +27,9 @@ class RegisterService {
         data.email,
         data.password,
         data.confirmPassword,
+        data.studentId,
+        data.studentName,
+        data.courseYear,
       );
 
       return null;
@@ -37,7 +39,7 @@ class RegisterService {
           return 'This email is already registered.';
 
         case 'invalid-email':
-          return 'Please enter a valid school email address.';
+          return 'Please enter a valid email address.';
 
         case 'weak-password':
           return 'The password is too weak.';

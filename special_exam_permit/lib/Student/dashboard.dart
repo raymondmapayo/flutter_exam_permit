@@ -7,12 +7,15 @@ import 'package:special_exam_permit/Student/page/student_home_page.dart';
 import 'package:special_exam_permit/Student/page/student_profile_page.dart';
 
 import 'package:special_exam_permit/Student/page/student_requests_page.dart';
+import 'package:special_exam_permit/model/user_model.dart';
 import 'package:special_exam_permit/pages/request_form_page.dart';
 
 import 'package:special_exam_permit/screens/special_exam_landing/um_theme.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  final UserModel user;
+
+  const Dashboard({super.key, required this.user});
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -22,6 +25,7 @@ class _DashboardState extends State<Dashboard> {
   int _currentIndex = 0;
   List<Widget> get _pages => [
     StudentHomePage(
+      user: widget.user,
       onRequestTap: () {
         setState(() {
           _currentIndex = 1;

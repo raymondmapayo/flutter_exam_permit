@@ -24,6 +24,12 @@ class _RegisterState extends State<Register> {
 
   final TextEditingController _passwordController = TextEditingController();
 
+  final TextEditingController _studentIdController = TextEditingController();
+
+  final TextEditingController _studentNameController = TextEditingController();
+
+  final TextEditingController _courseYearController = TextEditingController();
+
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
@@ -36,6 +42,12 @@ class _RegisterState extends State<Register> {
       return;
     }
 
+    final studentId = _studentIdController.text.trim();
+
+    final studentName = _studentNameController.text.trim();
+
+    final courseYear = _courseYearController.text.trim();
+
     final email = _emailController.text.trim().toLowerCase();
 
     final password = _passwordController.text;
@@ -43,6 +55,9 @@ class _RegisterState extends State<Register> {
     final confirmPassword = _confirmPasswordController.text;
 
     final data = RegisterModel(
+      studentId: studentId,
+      studentName: studentName,
+      courseYear: courseYear,
       email: email,
       password: password,
       confirmPassword: confirmPassword,
@@ -53,9 +68,15 @@ class _RegisterState extends State<Register> {
     });
 
     try {
-      await _registerService.register(data);
+      final error = await _registerService.register(data);
 
       if (!mounted) return;
+
+      if (error != null) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error)));
+        return;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account created successfully.')),
@@ -85,6 +106,10 @@ class _RegisterState extends State<Register> {
 
   @override
   void dispose() {
+    _studentIdController.dispose();
+    _studentNameController.dispose();
+    _courseYearController.dispose();
+
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -125,6 +150,57 @@ class _RegisterState extends State<Register> {
                         const RegisterHeader(),
 
                         const SizedBox(height: 30),
+
+                        // STUDENT ID
+                        RegisterTextField(
+                          controller: _studentIdController,
+                          label: 'Student ID',
+                          icon: Icons.badge_outlined,
+                          isLoading: isLoading,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter your Student ID.';
+                            }
+
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // FULL NAME
+                        RegisterTextField(
+                          controller: _studentNameController,
+                          label: 'Full Name',
+                          icon: Icons.person_outline,
+                          isLoading: isLoading,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter your full name.';
+                            }
+
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // COURSE & YEAR
+                        RegisterTextField(
+                          controller: _courseYearController,
+                          label: 'Course & Year',
+                          icon: Icons.school_outlined,
+                          isLoading: isLoading,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter your course and year.';
+                            }
+
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
 
                         RegisterTextField(
                           controller: _emailController,

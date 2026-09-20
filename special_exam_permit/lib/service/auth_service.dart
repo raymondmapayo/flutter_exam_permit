@@ -39,6 +39,9 @@ class AuthService {
     String email,
     String password,
     String confirmPassword,
+    String studentId,
+    String studentName,
+    String courseYear,
   ) async {
     if (password != confirmPassword) {
       throw Exception('Passwords do not match.');
@@ -59,6 +62,9 @@ class AuthService {
     await _firestore.collection('users').doc(user.uid).set({
       'email': email,
       'role': 'student',
+      'studentId': studentId,
+      'studentName': studentName,
+      'courseYear': courseYear,
     });
 
     return result;
