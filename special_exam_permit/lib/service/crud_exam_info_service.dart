@@ -36,6 +36,40 @@ class CrudExamInfoService {
         .snapshots();
   }
 
+  Future<void> deleteExamRequest(String documentId) async {
+    await _firestore
+        .collection('exams_students_resquest')
+        .doc(documentId)
+        .delete();
+  }
+
+  Future<void> updateExamRequest(
+    String documentId,
+    Map<String, dynamic> data,
+  ) async {
+    await _firestore
+        .collection('exams_students_resquest')
+        .doc(documentId)
+        .update(data);
+  }
+
+  Stream<QuerySnapshot> getExamRequests() {
+    return _firestore
+        .collection('exams_students_resquest')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
+  Future<void> updateExamRequestStatus({
+    required String documentId,
+    required String status,
+  }) async {
+    await _firestore
+        .collection('exams_students_resquest')
+        .doc(documentId)
+        .update({'status': status});
+  }
+
   // ============================================================
   // ADD EXAM REQUEST
   // ============================================================

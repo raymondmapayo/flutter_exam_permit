@@ -19,7 +19,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   final CrudExamInfoService _examInfoService = CrudExamInfoService();
   int _currentIndex = 0;
 
-  List<StatelessWidget> get pages => [
+  List<Widget> get pages => [
     const DashboardPage(),
     const RequestsPage(),
     ExamInformationPage(examInfoService: _examInfoService),
