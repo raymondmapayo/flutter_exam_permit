@@ -123,7 +123,7 @@ class RequestsPage extends StatelessWidget {
                       subject: subject,
                       examTime: examTime,
 
-                      // Pass lowercase status
+                      // Firebase status
                       status: status,
 
                       // =================================================

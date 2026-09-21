@@ -17,9 +17,31 @@ class RequestCard extends StatelessWidget {
     required this.onView,
   });
 
+  // Get color based on request status
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'APPROVED':
+        return Colors.green.shade700;
+
+      case 'REJECTED':
+      case 'REJECT':
+        return Colors.red.shade700;
+
+      case 'PENDING':
+        return Colors.orange.shade700;
+
+      default:
+        return Colors.grey.shade700;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bool isApproved = status == 'Approved';
+    // Always display status in uppercase
+    final String displayStatus = status.toUpperCase();
+
+    // Get status color
+    final Color statusColor = _getStatusColor(displayStatus);
 
     return Card(
       elevation: 1,
@@ -38,7 +60,9 @@ class RequestCard extends StatelessWidget {
                     color: UMTheme.maroon,
                   ),
                 ),
+
                 const SizedBox(width: 12),
+
                 Expanded(
                   child: Text(
                     student,
@@ -48,40 +72,44 @@ class RequestCard extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                // STATUS BADGE
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: isApproved
-                        ? Colors.green.withOpacity(0.12)
-                        : Colors.orange.withOpacity(0.12),
+                    color: statusColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    status,
+                    displayStatus,
                     style: TextStyle(
-                      color: isApproved
-                          ? Colors.green.shade700
-                          : Colors.orange.shade700,
-                      fontWeight: FontWeight.w600,
+                      color: statusColor,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 14),
+
             Text(
               'Subject: $subject',
               style: TextStyle(color: Colors.grey.shade700),
             ),
+
             const SizedBox(height: 5),
+
             Text(
               'Exam Time: $examTime',
               style: TextStyle(color: Colors.grey.shade700),
             ),
+
             const SizedBox(height: 12),
+
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
