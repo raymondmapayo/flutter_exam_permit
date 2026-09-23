@@ -34,6 +34,10 @@ class AuthService {
     return UserModel.fromMap(document.id, data);
   }
 
+  Future<void> resetPassword(String email) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
+  }
+
   // REGISTER STUDENT
   Future<UserCredential?> createWithEmailAndPassword(
     String email,

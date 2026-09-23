@@ -64,12 +64,33 @@ class CrudExamInfoService {
     required String documentId,
     required String status,
   }) async {
-    await _firestore
+    final requestRef = _firestore
         .collection('exams_students_resquest')
-        .doc(documentId)
-        .update({'status': status});
-  }
+        .doc(documentId);
 
+    final requestDoc = await requestRef.get();
+
+    if (!requestDoc.exists) {
+      throw Exception('Exam request not found.');
+    }
+
+    final data = requestDoc.data();
+
+    if (data == null) {
+      throw Exception('Exam request data is empty.');
+    }
+
+    final normalizedStatus = status.trim().toLowerCase();
+
+    if (normalizedStatus != 'approved' && normalizedStatus != 'rejected') {
+      throw Exception('Invalid status. Only approved or rejected are allowed.');
+    }
+
+    await requestRef.update({
+      'status': normalizedStatus,
+      'updatedAt': Timestamp.now(),
+    });
+  }
   // ============================================================
   // ADD EXAM REQUEST
   // ============================================================

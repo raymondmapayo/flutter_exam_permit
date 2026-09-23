@@ -15,6 +15,51 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
+void _showFullImage(BuildContext context, String documentUrl) {
+  showDialog(
+    context: context,
+    barrierColor: Colors.black87,
+    builder: (dialogContext) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: SizedBox(
+          width: MediaQuery.of(dialogContext).size.width * 0.9,
+          height: MediaQuery.of(dialogContext).size.height * 0.85,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: InteractiveViewer(
+                  minScale: 0.5,
+                  maxScale: 5,
+                  child: Center(
+                    child: Image.network(documentUrl, fit: BoxFit.contain),
+                  ),
+                ),
+              ),
+
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Material(
+                  color: Colors.black54,
+                  shape: const CircleBorder(),
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 class _DashboardPageState extends State<DashboardPage> {
   final CrudExamInfoService _service = CrudExamInfoService();
   bool isLoading = false;
@@ -408,7 +453,12 @@ class _DashboardPageState extends State<DashboardPage> {
     final data = doc.data() as Map<String, dynamic>;
 
     String currentStatus =
-        data['status']?.toString().toLowerCase() ?? 'pending';
+        data['status']?.toString().trim().toLowerCase() ?? 'pending';
+
+    // Make sure the value exists in the dropdown items.
+    if (!['pending', 'approved', 'rejected'].contains(currentStatus)) {
+      currentStatus = 'pending';
+    }
 
     bool isLoading = false;
 
@@ -423,50 +473,62 @@ class _DashboardPageState extends State<DashboardPage> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
 
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Student: ${data['studentName'] ?? '-'}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  DropdownButtonFormField<String>(
-                    value: currentStatus,
-                    decoration: const InputDecoration(
-                      labelText: 'Status',
-                      border: OutlineInputBorder(),
+              content: SizedBox(
+                width: 400,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Student: ${data['studentName'] ?? '-'}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
 
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'pending',
-                        child: Text('Pending'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'approved',
-                        child: Text('Approved'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'rejected',
-                        child: Text('Rejected'),
-                      ),
-                    ],
+                    Text(
+                      'Subject: ${data['subject'] ?? '-'}',
+                      style: TextStyle(color: Colors.grey.shade700),
+                    ),
 
-                    onChanged: isLoading
-                        ? null
-                        : (value) {
-                            if (value != null) {
-                              setDialogState(() {
-                                currentStatus = value;
-                              });
-                            }
-                          },
-                  ),
-                ],
+                    const SizedBox(height: 16),
+
+                    _buildDocumentPreview(data['documentUrl']?.toString()),
+
+                    const SizedBox(height: 8),
+
+                    DropdownButtonFormField<String>(
+                      initialValue: currentStatus,
+                      decoration: const InputDecoration(
+                        labelText: 'Status',
+                        border: OutlineInputBorder(),
+                      ),
+
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'pending',
+                          child: Text('Pending'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'approved',
+                          child: Text('Approved'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'rejected',
+                          child: Text('Rejected'),
+                        ),
+                      ],
+
+                      onChanged: isLoading
+                          ? null
+                          : (value) {
+                              if (value != null) {
+                                setDialogState(() {
+                                  currentStatus = value;
+                                });
+                              }
+                            },
+                    ),
+                  ],
+                ),
               ),
 
               actions: [
@@ -493,6 +555,9 @@ class _DashboardPageState extends State<DashboardPage> {
                           });
 
                           try {
+                            // =================================================
+                            // UPDATE STATUS + SEND EMAIL
+                            // =================================================
                             await _service.updateExamRequestStatus(
                               documentId: doc.id,
                               status: currentStatus,
@@ -502,10 +567,17 @@ class _DashboardPageState extends State<DashboardPage> {
 
                             Navigator.pop(dialogContext);
 
+                            // =================================================
+                            // SUCCESS MESSAGE
+                            // =================================================
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                  'Request status updated successfully.',
+                                  currentStatus == 'approved'
+                                      ? 'Request approved. Email notification sent.'
+                                      : currentStatus == 'rejected'
+                                      ? 'Request rejected. Email notification sent.'
+                                      : 'Request status updated successfully.',
                                 ),
                               ),
                             );
@@ -743,6 +815,126 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDocumentPreview(String? documentUrl) {
+    if (documentUrl == null || documentUrl.isEmpty) {
+      return const Text(
+        'No supporting document uploaded.',
+        style: TextStyle(color: Colors.grey),
+      );
+    }
+
+    bool isHovering = false;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Supporting Document',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+
+            const SizedBox(height: 10),
+
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              onEnter: (_) {
+                setState(() => isHovering = true);
+              },
+              onExit: (_) {
+                setState(() => isHovering = false);
+              },
+              child: GestureDetector(
+                onTap: () {
+                  _showFullImage(context, documentUrl);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: double.infinity,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isHovering ? UMTheme.maroon : Colors.grey.shade300,
+                      width: isHovering ? 2 : 1,
+                    ),
+                    boxShadow: isHovering
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(9),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          documentUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Text(
+                                'Unable to load image',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            );
+                          },
+                        ),
+
+                        // Hover overlay
+                        AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: isHovering ? 1 : 0,
+                          child: Container(
+                            color: Colors.black54,
+                            child: const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.zoom_in,
+                                    color: Colors.white,
+                                    size: 38,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'View Full',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 5),
+
+            Text(
+              'Click the image to view full size',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+          ],
+        );
+      },
     );
   }
 }
