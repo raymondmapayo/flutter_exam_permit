@@ -49,12 +49,14 @@ class _DashboardState extends State<Dashboard> {
       // APP BAR
       // =========================
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: UMTheme.maroon,
         foregroundColor: Colors.white,
         elevation: 0,
-
+        centerTitle: true,
         title: const Text(
-          'ExamFlow',
+          'Examination Flow',
+
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
 

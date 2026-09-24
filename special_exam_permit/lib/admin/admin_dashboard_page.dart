@@ -32,19 +32,24 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       backgroundColor: const Color(0xFFF5F6F8),
 
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: UMTheme.maroon,
         foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         title: const Text(
-          'ExamFlow Admin',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'Admin',
+
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
+
         actions: [
           IconButton(
             tooltip: 'Logout',
-            onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            },
             icon: const Icon(Icons.logout),
+            onPressed: () {
+              _showLogoutDialog(context);
+            },
           ),
         ],
       ),
@@ -103,6 +108,63 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           });
         },
       ),
+    );
+  }
+  // =========================
+  // LOGOUT DIALOG
+  // =========================
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+
+          title: const Text(
+            'Logout',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: UMTheme.maroon,
+            ),
+          ),
+
+          content: const Text('Are you sure you want to logout?'),
+
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/',
+                  (route) => false,
+                );
+              },
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: UMTheme.maroon,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

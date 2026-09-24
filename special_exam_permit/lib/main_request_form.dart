@@ -223,7 +223,6 @@ class MainRequestForm extends StatelessWidget {
               TextField(
                 controller: emailController,
                 onChanged: onEmailChanged,
-                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   label: const Text('Email'),

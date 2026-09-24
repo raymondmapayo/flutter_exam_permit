@@ -95,7 +95,7 @@ class _ExamRequestPageState extends State<ExamRequestPage> {
     _studentIdController.text = widget.user.studentId;
     _studentNameController.text = widget.user.studentName;
     _courseYearController.text = widget.user.courseYear;
-
+    _emailController.text = widget.user.email;
     _loadSubjects();
     _loadReasons();
     _loadExamTimes();
@@ -267,15 +267,11 @@ class _ExamRequestPageState extends State<ExamRequestPage> {
           : null;
 
       // EMAIL
+
+      // EMAIL
       final email = _emailController.text.trim().toLowerCase();
 
-      if (email.isEmpty) {
-        emailError = 'Email is required';
-      } else if (!email.endsWith('@umindanao.edu.ph')) {
-        emailError = 'Please use your UM email address';
-      } else {
-        emailError = null;
-      }
+      emailError = email.isEmpty ? 'Email is required' : null;
 
       // SUBJECT
       subjectError = selectedSubject == null ? 'Please select a subject' : null;
