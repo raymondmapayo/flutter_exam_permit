@@ -14,33 +14,155 @@ class EmailService {
     required String status,
     String? examSlipUrl,
   }) async {
-    final response = await http.post(
-      Uri.parse(scriptUrl),
-      body: {
+    final client = http.Client();
+
+    try {
+      // ============================================================
+      // CREATE POST REQUEST
+      // ============================================================
+
+      final request = http.Request('POST', Uri.parse(scriptUrl));
+
+      request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+
+      request.bodyFields = {
         'email': email,
         'studentName': studentName,
         'subject': subject,
         'examTime': examTime,
         'status': status,
         'examSlipUrl': examSlipUrl ?? '',
-      },
-    );
+      };
 
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Failed to send email: '
-        '${response.statusCode} ${response.body}',
-      );
-    }
+      // ============================================================
+      // SEND REQUEST
+      // ============================================================
 
-    try {
-      final result = jsonDecode(response.body);
+      final streamedResponse = await client.send(request);
+
+      print('==============================================');
+      print('             EMAIL DEBUG');
+      print('==============================================');
+      print('STATUS CODE: ${streamedResponse.statusCode}');
+      print('HEADERS: ${streamedResponse.headers}');
+
+      // ============================================================
+      // HANDLE GOOGLE APPS SCRIPT REDIRECT
+      // ============================================================
+
+      if (streamedResponse.statusCode == 302 ||
+          streamedResponse.statusCode == 301 ||
+          streamedResponse.statusCode == 303 ||
+          streamedResponse.statusCode == 307 ||
+          streamedResponse.statusCode == 308) {
+        final redirectUrl = streamedResponse.headers['location'];
+
+        print('REDIRECT URL: $redirectUrl');
+
+        if (redirectUrl == null || redirectUrl.isEmpty) {
+          throw Exception(
+            'Google Apps Script returned ${streamedResponse.statusCode} '
+            'but no redirect URL was provided.',
+          );
+        }
+
+        // ============================================================
+        // FOLLOW REDIRECT
+        // ============================================================
+
+        final redirectResponse = await client.get(Uri.parse(redirectUrl));
+
+        final body = redirectResponse.body;
+
+        print('REDIRECT STATUS: ${redirectResponse.statusCode}');
+        print('REDIRECT BODY: $body');
+        print('==============================================');
+
+        if (redirectResponse.statusCode != 200) {
+          throw Exception(
+            'Google Apps Script redirect failed: '
+            '${redirectResponse.statusCode}',
+          );
+        }
+
+        // ============================================================
+        // DECODE JSON RESPONSE
+        // ============================================================
+
+        dynamic result;
+
+        try {
+          result = jsonDecode(body);
+        } catch (e) {
+          throw Exception(
+            'Invalid JSON response from Google Apps Script: $body',
+          );
+        }
+
+        if (result is! Map) {
+          throw Exception('Unexpected response from Google Apps Script.');
+        }
+
+        if (result['success'] != true) {
+          throw Exception(
+            result['message']?.toString() ??
+                'Google Apps Script failed to send the email.',
+          );
+        }
+
+        print('EMAIL SENT SUCCESSFULLY');
+        return;
+      }
+
+      // ============================================================
+      // NORMAL 200 RESPONSE
+      // ============================================================
+
+      final body = await streamedResponse.stream.bytesToString();
+
+      print('BODY: $body');
+      print('==============================================');
+
+      if (streamedResponse.statusCode != 200) {
+        throw Exception(
+          'Failed to send email: '
+          '${streamedResponse.statusCode} $body',
+        );
+      }
+
+      // ============================================================
+      // DECODE JSON
+      // ============================================================
+
+      dynamic result;
+
+      try {
+        result = jsonDecode(body);
+      } catch (e) {
+        throw Exception('Invalid JSON response from Google Apps Script: $body');
+      }
+
+      if (result is! Map) {
+        throw Exception('Unexpected response from Google Apps Script.');
+      }
 
       if (result['success'] != true) {
-        throw Exception(result['message'] ?? 'Failed to send email.');
+        throw Exception(
+          result['message']?.toString() ??
+              'Google Apps Script failed to send the email.',
+        );
       }
+
+      print('EMAIL SENT SUCCESSFULLY');
     } catch (e) {
-      throw Exception('Invalid response from Google Apps Script: $e');
+      print('==============================================');
+      print('EMAIL ERROR');
+      print(e);
+      print('==============================================');
+
+      throw Exception('Failed to send email: $e');
+    } finally {
+      client.close();
     }
   }
 }
